@@ -163,7 +163,14 @@ fi
 check_effective() {
     name=$1
     expected=$2
-    actual=$(awk -v key="$name" '$1 == key { print $2; exit }' "$EFFECTIVE_CONFIG")
+    actual=$(awk -v key="$name" '
+        $1 == key {
+            $1 = ""
+            sub(/^[[:space:]]+/, "")
+            print
+            exit
+        }
+    ' "$EFFECTIVE_CONFIG")
     [ "$actual" = "$expected" ] || {
         rollback
         die "Effective setting '$name' is '$actual', expected '$expected'."
